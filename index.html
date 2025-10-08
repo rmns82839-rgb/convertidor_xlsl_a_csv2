@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertir Excel a CSV Organizado</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; text-align: center; background-color: #f4f4f9; }
+        h1 { color: #333; }
+        p { color: #666; }
+        input[type="file"] { margin: 20px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: white; }
+        button { background-color: #007bff; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #0056b3; }
+        #mensaje { margin-top: 25px; font-weight: bold; color: #333; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        /* Estilo para el campo del separador */
+        .separator-control { margin-bottom: 20px; display: inline-block; }
+        .separator-control label { margin-right: 10px; font-weight: normal; }
+    </style>
+</head>
+<body>
+
+    <h1>Excel a CSV Organizado (Móvil)</h1>
+    <p>Asegura una mejor visualización seleccionando el separador.</p>
+
+    <div class="separator-control">
+        <label for="separator">Separador CSV:</label>
+        <select id="separator">
+            <option value=",">Coma (,) - Estándar Internacional</option>
+            <option value=";">Punto y Coma (;) - Estándar Europeo/Latino</option>
+        </select>
+    </div>
+
+    <input type="file" id="archivoExcel" accept=".xlsx, .xls">
+    
+    <button onclick="convertirYDescargar()">Convertir y Descargar CSV</button>
+
+    <div id="mensaje"></div>
+
+    <script>
+        function convertirYDescargar() {
+            const fileInput = document.getElementById('archivoExcel');
+            const file = fileInput.files[0];
+            const mensajeDiv = document.getElementById('mensaje');
+            // Obtener el separador seleccionado
+            const separador = document.getElementById('separator').value; 
+
+            if (!file) {
+                mensajeDiv.className = 'error';
+                mensajeDiv.textContent = '❌ Por favor, selecciona un archivo Excel.';
+                return;
+            }
+
+            mensajeDiv.className = '';
+            mensajeDiv.textContent = 'Procesando...';
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    
+                    // 🔑 AJUSTE CLAVE 1: Usamos el separador seleccionado por el usuario (FS)
+                    const csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: separador, RS: '\n' });
+
+                    const nuevoNombre = file.name.replace(/\.[^/.]+$/, "") + '.csv';
+                    
+                    // 🔑 AJUSTE CLAVE 2: La función descarga explícitamente en UTF-8
+                    descargarCSV(csvData, nuevoNombre); 
+
+                    mensajeDiv.className = 'success';
+                    mensajeDiv.textContent = `✅ ¡Conversión completa! Archivo '${nuevoNombre}' descargado.`;
+
+                } catch (error) {
+                    mensajeDiv.className = 'error';
+                    mensajeDiv.textContent = `❌ Error al procesar el archivo: ${error.message}`;
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function descargarCSV(csvString, filename) {
+            // 🔑 GARANTÍA DE CARACTERES: Definimos el tipo de archivo como text/csv con charset=utf-8
+            const blob = new Blob(["\ufeff", csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            
+            if (link.download !== undefined) { 
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+
+</body>
+</html>
