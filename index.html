@@ -36,16 +36,16 @@
         
         /* Contenedor Principal de la App */
         #container {
-            width: 95%; /* Más adaptable */
-            max-width: 600px; /* Ancho más compacto */
+            width: 95%; 
+            max-width: 600px; 
             margin: auto;
             background: white;
-            padding: 30px; /* Más padding */
-            border-radius: 12px; /* Bordes redondeados */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Sombra moderna */
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
             box-sizing: border-box;
             border-top: 5px solid var(--color-accent);
-            /* Espacio para el botón fijo: Ajustado para el nuevo tamaño */
+            /* Espacio para el botón fijo */
             margin-top: 70px; 
         }
 
@@ -56,13 +56,19 @@
             border: 1px solid #ccc; 
             border-radius: 5px; 
             background-color: white; 
-            width: 90%; /* Mejor ajuste en móvil */
+            width: 90%; 
             box-sizing: border-box;
         }
+        
+        /* ESTILO CLAVE para el SELECT (Menú Desplegable Responsivo) */
         select {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            width: 100%; /* Ocupa todo el ancho en móvil */
+            max-width: 300px; 
+            box-sizing: border-box;
+            margin-top: 5px; 
         }
         
         /* Botón de Acción Principal */
@@ -92,10 +98,19 @@
         }
         .success { color: var(--color-success); }
         .error { color: var(--color-error); }
-        .separator-control { margin-bottom: 20px; display: block; }
-        .separator-control label { margin-right: 10px; font-weight: 500; }
 
-        /* --- BOTÓN DE VOLVER (Más pequeño y Responsivo) --- */
+        /* Contenedor del Separador */
+        .separator-control { 
+            margin-bottom: 20px; 
+            display: inline-block; 
+        }
+        .separator-control label { 
+            margin-right: 10px; 
+            font-weight: 500; 
+            display: block; /* Etiqueta en su propia línea en móvil */
+        }
+
+        /* --- BOTÓN DE VOLVER (Fijo y Responsivo) --- */
         .back-button {
             position: fixed; 
             top: 15px;
@@ -104,16 +119,16 @@
             z-index: 1000;
             background-color: var(--color-button-bg); 
             color: var(--color-accent);
-            padding: 8px 15px; /* Base más pequeña */
+            padding: 8px 15px; 
             border: 2px solid var(--color-accent);
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.8em; /* Base de fuente más pequeña */
+            font-size: 0.8em; 
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             transition: background-color 0.2s ease, transform 0.1s;
             text-transform: uppercase;
-            text-decoration: none; /* Asegurar que se vea como botón si fuera un <a> */
+            text-decoration: none; 
             display: inline-block;
         }
         .back-button:hover {
@@ -125,11 +140,17 @@
         @media (min-width: 600px) {
             .back-button {
                 top: 20px;
-                padding: 10px 20px; /* Ligeramente más grande en desktop */
+                padding: 10px 20px; 
                 font-size: 0.9em;
             }
             #container {
                  max-width: 750px;
+            }
+            .separator-control label {
+                display: inline; /* Vuelve a poner la etiqueta en línea con el select en desktop */
+            }
+            select {
+                width: auto; /* Permite que el select se ajuste a su contenido en desktop */
             }
         }
     </style>
@@ -164,7 +185,6 @@
             const fileInput = document.getElementById('archivoExcel');
             const file = fileInput.files[0];
             const mensajeDiv = document.getElementById('mensaje');
-            // Obtener el separador seleccionado
             const separador = document.getElementById('separator').value; 
 
             if (!file) {
@@ -186,12 +206,12 @@
                     const sheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[sheetName];
                     
-                    // Ajuste CLAVE: Usamos el separador seleccionado por el usuario (FS)
+                    // Conversión a CSV, usando el separador seleccionado (FS)
                     const csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: separador, RS: '\n' });
 
                     const nuevoNombre = file.name.replace(/\.[^/.]+$/, "") + '.csv';
                     
-                    // La función descarga explícitamente en UTF-8
+                    // Descarga del archivo
                     descargarCSV(csvData, nuevoNombre); 
 
                     mensajeDiv.className = 'success';
@@ -207,8 +227,7 @@
         }
 
         function descargarCSV(csvString, filename) {
-            // GARANTÍA DE CARACTERES: Definimos el tipo de archivo como text/csv con charset=utf-8
-            // Se incluye el BOM (\ufeff) para asegurar la correcta codificación UTF-8 en Excel/softwares de oficina
+            // Incluye el BOM (\ufeff) para garantizar la correcta codificación UTF-8 en Excel
             const blob = new Blob(["\ufeff", csvString], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             
