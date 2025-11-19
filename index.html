@@ -5,96 +5,159 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Convertir Excel a CSV Organizado</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; padding: 20px; text-align: center; background-color: #f4f4f9; }
-        h1 { color: #333; }
-        p { color: #666; }
-        input[type="file"] { margin: 20px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: white; }
-        button { background-color: #007bff; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
-        button:hover { background-color: #0056b3; }
-        #mensaje { margin-top: 25px; font-weight: bold; color: #333; }
-        .success { color: #28a745; }
-        .error { color: #dc3545; }
-        /* Estilo para el campo del separador */
-        .separator-control { margin-bottom: 20px; display: inline-block; }
-        .separator-control label { margin-right: 10px; font-weight: normal; }
+        /* Paleta y Estilo General */
+        :root {
+            --color-primary: #333;
+            --color-accent: #FFC107; /* Amarillo de seguridad */
+            --color-button-bg: #1A1A2E; /* Azul oscuro del portal */
+            --color-success: #28a745;
+            --color-error: #dc3545;
+            --color-bg-light: #eef1f5;
+        }
 
-        /* --- ESTILOS DEL BOTÓN SUPERIOR FIJO Y LLAMATIVO --- */
-.back-button {
-    position: fixed; 
-    top: 15px;
-    margin-bottom: 20px;
-    left: 50%; /* Centrado horizontalmente */
-    transform: translateX(-50%); /* Ajuste para centrar */
-    z-index: 1000; 
-    background-color: #333; /* Color de base (Negro Motorizado) */
-    color: #FFC107; /* Color de impacto (Amarillo de Seguridad) */
-    padding: 10px 20px; 
-    border: 2px solid #FFC107; /* Borde de seguridad */
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em; 
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-    transition: background-color 0.2s ease, transform 0.1s;
-}
-.back-button:hover {
-    background-color: #555;
-    transform: translateX(-50%) scale(1.02);
-}
-/* Media query para pantallas grandes */
-@media (min-width: 300px) {
-    .back-button {
-        top: 20px;
-        margin-bottom: 20px;
-        padding: 12px 25px;
-        font-size: 1em;
-    }
-}
-
-        #container {
-    width: 100%;
-    max-width: 900px; 
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    border-top: 5px solid #FFC107;
-    
-    /* 💥 ESTA LÍNEA ES LA CLAVE PARA MOVER EL CONTENIDO BAJO EL BOTÓN */
-    margin-top: 60px; 
-    /* Si tienes otra regla de 'margin' que usa 'auto' arriba, reemplázala. */
-}
+        body { 
+            font-family: 'Inter', sans-serif; 
+            padding: 0; 
+            margin: 0;
+            text-align: center; 
+            background-color: var(--color-bg-light); 
+        }
+        h1 { 
+            color: var(--color-primary); 
+            font-weight: 700;
+            margin-top: 0;
+        }
+        p { 
+            color: #666; 
+            margin-bottom: 30px;
+        }
         
+        /* Contenedor Principal de la App */
+        #container {
+            width: 95%; /* Más adaptable */
+            max-width: 600px; /* Ancho más compacto */
+            margin: auto;
+            background: white;
+            padding: 30px; /* Más padding */
+            border-radius: 12px; /* Bordes redondeados */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Sombra moderna */
+            box-sizing: border-box;
+            border-top: 5px solid var(--color-accent);
+            /* Espacio para el botón fijo: Ajustado para el nuevo tamaño */
+            margin-top: 70px; 
+        }
+
+        /* Controles de Formulario */
+        input[type="file"] { 
+            margin: 20px 0; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            background-color: white; 
+            width: 90%; /* Mejor ajuste en móvil */
+            box-sizing: border-box;
+        }
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        /* Botón de Acción Principal */
+        button { 
+            background-color: var(--color-button-bg); 
+            color: white; 
+            padding: 12px 30px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        button:hover { 
+            background-color: #383850; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        #mensaje { 
+            margin-top: 25px; 
+            font-weight: bold; 
+            color: var(--color-primary); 
+            font-size: 1.1em;
+        }
+        .success { color: var(--color-success); }
+        .error { color: var(--color-error); }
+        .separator-control { margin-bottom: 20px; display: block; }
+        .separator-control label { margin-right: 10px; font-weight: 500; }
+
+        /* --- BOTÓN DE VOLVER (Más pequeño y Responsivo) --- */
+        .back-button {
+            position: fixed; 
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background-color: var(--color-button-bg); 
+            color: var(--color-accent);
+            padding: 8px 15px; /* Base más pequeña */
+            border: 2px solid var(--color-accent);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em; /* Base de fuente más pequeña */
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: background-color 0.2s ease, transform 0.1s;
+            text-transform: uppercase;
+            text-decoration: none; /* Asegurar que se vea como botón si fuera un <a> */
+            display: inline-block;
+        }
+        .back-button:hover {
+            background-color: #555;
+            transform: translateX(-50%) scale(1.02);
+        }
+        
+        /* Media query para pantallas más grandes (Desktop/Tablet) */
+        @media (min-width: 600px) {
+            .back-button {
+                top: 20px;
+                padding: 10px 20px; /* Ligeramente más grande en desktop */
+                font-size: 0.9em;
+            }
+            #container {
+                 max-width: 750px;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <button class="back-button" onclick="window.location.href='https://rmns82839-rgb.github.io/portal-de-toma-de-muestras/'">
+    <a href="https://rmns82839-rgb.github.io/portal-de-toma-de-muestras/" class="back-button">
         VOLVER AL PORTAL PRINCIPAL
-    </button>
+    </a>
     
-    <div id="app-container" class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-10" style="margin-top: 60px !important;">
+    <div id="container">
+        <h1>Convertidor XLS/XLSX a CSV</h1>
+        <p>Selecciona tu archivo Excel (.xls o .xlsx). Asegura la compatibilidad con tu sistema de ruteo eligiendo el **separador correcto**.</p>
+
+        <div class="separator-control">
+            <label for="separator">Separador CSV:</label>
+            <select id="separator">
+                <option value=";">Punto y Coma (;) - Estándar Europeo/Latino (Recomendado)</option>
+                <option value=",">Coma (,) - Estándar Internacional (Comúnmente usado en EE. UU.)</option>
+            </select>
         </div>
 
-    <h1>Excel a CSV Organizado (Móvil)</h1>
-    <p>Asegura una mejor visualización seleccionando el separador.</p>
+        <input type="file" id="archivoExcel" accept=".xlsx, .xls">
+        
+        <button onclick="convertirYDescargar()">Convertir y Descargar CSV</button>
 
-    <div class="separator-control">
-        <label for="separator">Separador CSV:</label>
-        <select id="separator">
-            <option value=",">Coma (,) - Estándar Internacional</option>
-            <option value=";">Punto y Coma (;) - Estándar Europeo/Latino</option>
-        </select>
+        <div id="mensaje"></div>
     </div>
-
-    <input type="file" id="archivoExcel" accept=".xlsx, .xls">
-    
-    <button onclick="convertirYDescargar()">Convertir y Descargar CSV</button>
-
-    <div id="mensaje"></div>
 
     <script>
         function convertirYDescargar() {
@@ -123,12 +186,12 @@
                     const sheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[sheetName];
                     
-                    // 🔑 AJUSTE CLAVE 1: Usamos el separador seleccionado por el usuario (FS)
+                    // Ajuste CLAVE: Usamos el separador seleccionado por el usuario (FS)
                     const csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: separador, RS: '\n' });
 
                     const nuevoNombre = file.name.replace(/\.[^/.]+$/, "") + '.csv';
                     
-                    // 🔑 AJUSTE CLAVE 2: La función descarga explícitamente en UTF-8
+                    // La función descarga explícitamente en UTF-8
                     descargarCSV(csvData, nuevoNombre); 
 
                     mensajeDiv.className = 'success';
@@ -144,7 +207,8 @@
         }
 
         function descargarCSV(csvString, filename) {
-            // 🔑 GARANTÍA DE CARACTERES: Definimos el tipo de archivo como text/csv con charset=utf-8
+            // GARANTÍA DE CARACTERES: Definimos el tipo de archivo como text/csv con charset=utf-8
+            // Se incluye el BOM (\ufeff) para asegurar la correcta codificación UTF-8 en Excel/softwares de oficina
             const blob = new Blob(["\ufeff", csvString], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             
@@ -161,7 +225,4 @@
     </script>
 
 </body>
-
 </html>
-
-
